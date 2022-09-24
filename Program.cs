@@ -6,6 +6,7 @@ using DiscordBot.Classes.Modules;
 using DiscordBot.Classes.Services;
 using DiscordBot.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Configuration;
 using System.Reflection;
 

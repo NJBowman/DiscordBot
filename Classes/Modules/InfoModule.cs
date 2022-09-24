@@ -19,32 +19,11 @@ namespace DiscordBot.Classes.Modules
         public Task SayAsync([Remainder][Summary("The text to echo")] string echo)
             => ReplyAsync(echo);
 
-        // ReplyAsync is a method on ModuleBase
-
-        [Group("sample")]
-        public class SampleModule : ModuleBase<SocketCommandContext>
+        [Group("users")]
+        public class UserModule : ModuleBase<SocketCommandContext>
         {
-            // ~sample userinfo --> foxbot#0282
-            // ~sample userinfo @Khionu --> Khionu#8708
-            // ~sample userinfo Khionu#8708 --> Khionu#8708
-            // ~sample userinfo Khionu --> Khionu#8708
-            // ~sample userinfo 96642168176807936 --> Khionu#8708
-            // ~sample whois 96642168176807936 --> Khionu#8708
-            [Command("userinfo")]
-            [Alias("user", "whois")]
-            public async Task UserInfoAsync(
-                SocketUser? user = null)
-            {
-                var userInfo = user ?? Context.Client.CurrentUser;
-                await ReplyAsync($"{userInfo.Username}#{userInfo.Discriminator}");
-            }
-
-            // ~sample serverUserList
-            // ~sample asu
-            // ~sample allUsers
-            // ~sample serverUsers
-            [Command("serverUserList")]
-            [Alias ("allUsers", "serverUsers", "asu")]
+            // ~users all
+            [Command("all")]
             public async Task UserListAsync()
             {
                 List<string> guildUsersNames = new List<string>();
@@ -52,7 +31,7 @@ namespace DiscordBot.Classes.Modules
                 try
                 {
                     var guild = Context.Client.Guilds.Where(g => g.Name == "The Goose Hut").First();
-                    var guildUsers= guild.GetUsersAsync().ToListAsync().Result;
+                    var guildUsers = guild.GetUsersAsync().ToListAsync().Result;
                     guildUsersNames = guildUsers[0].Select(u => u.Username).ToList();
                 }
                 catch (Exception ex)
@@ -71,35 +50,72 @@ namespace DiscordBot.Classes.Modules
                     }
                 }
             }
-        }
 
-        /// <summary>
-        /// Nested submodules example
-        /// </summary>
-        [Group("admin")]
-        public class AdminModule : ModuleBase<SocketCommandContext>
-        {
-            [Group("clean")]
-            public class CleanModule : ModuleBase<SocketCommandContext>
+            //~users bitchRole
+            [Command("bitchRole")]
+            public async Task BitchListAsync()
             {
-                // ~admin clean
-                [Command]
-                public async Task DefaultCleanAsync()
-                {
-                    // ...
-                }
+                var guild = Context.Client.Guilds.Where(g => g.Name == "The Goose Hut").First();
+                var littleBitchRole = guild.Roles.Where(r => r.Name == "Little Bitch").First();
+                var guildUsers = guild.GetUsersAsync().ToListAsync().Result;
+                var littleBitchUsers = guildUsers[0].Where(u => u.RoleIds.Contains(littleBitchRole.Id)).ToList();
 
-                // ~admin clean messages 15
-                [Command("messages")]
-                public async Task CleanAsync(int count)
+                if (littleBitchUsers.Count > 0)
                 {
-                    // ...
+                    await ReplyAsync(string.Join("\n", littleBitchUsers));
+                }
+                else
+                {
+                    await ReplyAsync("Bot couldn't find any bitches");
                 }
             }
-            // ~admin ban foxbot#0282
-            [Command("ban")]
-            public Task BanAsync(IGuildUser user) =>
-                Context.Guild.AddBanAsync(user);
+        }
+
+        [Group("events")]
+        public class EventModule : ModuleBase<SocketCommandContext>
+        {
+            // ~events createEvent
+            [Command("createEvent")]
+            public async Task CreateEventAsync(string eventName, int daysInFuture, string eventLocation)
+            {
+                var guild = Context.Client.Guilds.Where(g => g.Name == "The Goose Hut").First();
+                var guildEvent = await guild
+                    .CreateEventAsync(eventName,
+                    DateTimeOffset.UtcNow.AddDays(daysInFuture),
+                    GuildScheduledEventType.Stage,
+                    endTime: DateTimeOffset.UtcNow.AddDays(daysInFuture + 1),
+                    location: eventLocation);
+
+                await ReplyAsync(string.Join("\n", guild.Events));
+            }
+        }
+
+        [Group("channel")]
+        public class ChannelModule : ModuleBase<SocketCommandContext>
+        {
+            // ~channel createChannelPost
+            [Command("createChannelPost")]
+            public async Task ChannelPostAsync(string channelName)
+            {
+                var guild = Context.Client.Guilds.Where(g => g.Name == "The Goose Hut").First();
+                var selectedChannels = guild.Channels.Where(c => c.Name == channelName);
+
+                if (selectedChannels.Count() == 0)
+                {
+                    await ReplyAsync("No Channels with that name");
+                }
+                else if (selectedChannels.Count() > 1)
+                {
+                    await ReplyAsync($"More than one channel found, please be more specific: \n {string.Join("/n", selectedChannels.Select(c => c.Name))}");
+                }
+                else 
+                {
+                    //Create a channel post...
+                    // may have to be a slash command in channel with admin permissions applied
+                }
+
+
+            }
         }
     }
 }
