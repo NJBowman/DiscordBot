@@ -50,6 +50,21 @@ namespace DiscordBot.Classes.Modules
                 var userInfo = user ?? Context.Client.CurrentUser;
                 await ReplyAsync($"{userInfo.Username}#{userInfo.Discriminator}");
             }
+
+            // ~sample serverUserList
+            // ~sample asu
+            // ~sample allUsers
+            // ~sample serverUsers
+            [Command("serverUserList")]
+            [Summary("Returns a list of users within the specified server")]
+            [Alias ("allUsers", "serverUsers", "asu")]
+            public async Task UserListAsync()
+            {
+                var guildUsers = Context.Guild.Users;
+                var guildUsersNames = guildUsers.Select(u => u.Username);
+
+                await ReplyAsync(string.Join("\n", guildUsersNames));
+            }
         }
 
         /// <summary>
