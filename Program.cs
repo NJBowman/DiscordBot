@@ -14,7 +14,7 @@ namespace DiscordBot
     internal class Program
     {
         public static Task Main(string[] args) => new Program().MainAsync();
-
+       
         private DiscordSocketClient _client;
         private readonly ILoggingService _loggingService;
         private readonly CommandService _commands;
